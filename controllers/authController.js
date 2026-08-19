@@ -1,45 +1,73 @@
-import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcryptjs";
+import User from "../models/User.js";
 
-// Generate token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d'
-  });
-};
-
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { fullName, email, mobile, password, confirmPassword, termsAccepted } =
+      req.body;
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
-
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+ 
+    if (!fullName || !email || !mobile || !password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    // Create user
+    
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    
+    if (!termsAccepted) {
+      return res.status(400).json({
+        success: false,
+        message: "Please accept Terms and Conditions",
+      });
+    }
+
+    
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+   
     const user = await User.create({
-      name,
+      fullName,
       email,
-      password
+      mobile,
+      password: hashedPassword,
+      termsAccepted,
     });
 
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        name: user.name,
+   
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
         email: user.email,
-        token: generateToken(user._id)
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
+        mobile: user.mobile,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Register Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
