@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -82,19 +83,23 @@ export const loginUser = async (req, res) => {
     // Check for user email
     const user = await User.findOne({ email }).select('+password');
 
-    if (user && (await user.matchPassword(password))) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
-        _id: user._id,
-        email: user.email,
-        role: user.role,
+        success: true,
+        message: 'Login successful',
         token: generateToken(user._id),
-        message: 'Login successfully'
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone
+        }
       });
     } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
