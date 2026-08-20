@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false, // Keeping select: false for security, as it is good practice
+      select: false, 
     },
     role: {
       type: String,
