@@ -3,12 +3,12 @@ import generateToken from '../utils/generateToken.js';
 
 // @desc    Register new user
 // @route   POST /api/auth/register
-// @access  Public
+
 export const registerUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user exists
+    
     const userExists = await User.findOne({ email });
 
     if (userExists) {
