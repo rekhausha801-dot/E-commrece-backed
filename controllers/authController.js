@@ -44,9 +44,9 @@ export const registerUser = async (req, res) => {
 
    
     const user = await User.create({
-      fullName,
+      name: fullName,
       email,
-      mobile,
+      phone: mobile,
       password: hashedPassword,
       termsAccepted,
     });
@@ -57,9 +57,9 @@ export const registerUser = async (req, res) => {
       message: "Account created successfully",
       user: {
         id: user._id,
-        fullName: user.fullName,
+        name: user.name,
         email: user.email,
-        mobile: user.mobile,
+        phone: user.phone,
       },
     });
   } catch (error) {
