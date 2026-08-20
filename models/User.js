@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    mobile: {
+    phone: {
       type: String,
       required: true,
       trim: true,
@@ -28,6 +28,17 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
+    },
+    profileImage: {
+      type: String,
+      default: "",
+    },
+    dateOfBirth: {
+      type: String, // Stored as YYYY-MM-DD
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
     },
   },
   { timestamps: true }
