@@ -6,6 +6,12 @@ import { fileURLToPath } from 'url';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import brandRoutes from './routes/brandRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
+import couponRoutes from './routes/couponRoutes.js';
+import bannerRoutes from './src/routes/banner.routes.js';
 
 dotenv.config();
 
@@ -25,6 +31,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/brands', brandRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/offers', offerRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // Base route
 app.get('/', (req, res) => {

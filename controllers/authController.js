@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Customer from "../models/customerModel.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -43,13 +44,24 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
    
-    const user = await User.create({
+        const user = await User.create({
       name: fullName,
       email,
       phone: mobile,
       password: hashedPassword,
       termsAccepted,
     });
+
+    try {
+      await Customer.create({
+        name: fullName,
+        email,
+        phone: mobile,
+        status: "Active"
+      });
+    } catch (customerError) {
+      console.error("Failed to sync customer profile during registration:", customerError);
+    }
 
    
     res.status(201).json({
@@ -116,3 +128,4 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+

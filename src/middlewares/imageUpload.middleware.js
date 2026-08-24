@@ -1,9 +1,13 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// Ensure upload directory exists
-const uploadDir = 'uploads/profiles';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const uploadDir = path.join(__dirname, '..', 'uploads', 'banners');
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -26,7 +30,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
+const imageUpload = multer({ 
   storage: storage,
   fileFilter: fileFilter,
   limits: {
@@ -34,4 +38,4 @@ const upload = multer({
   }
 });
 
-export default upload;
+export default imageUpload;
