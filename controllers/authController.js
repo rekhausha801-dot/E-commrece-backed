@@ -67,6 +67,17 @@ export const registerUser = async (req, res) => {
       termsAccepted,
     });
 
+    try {
+      await Customer.create({
+        name: fullName,
+        email,
+        phone: mobile,
+        status: "Active"
+      });
+    } catch (customerError) {
+      console.error("Failed to sync customer profile during registration:", customerError);
+    }
+
    
     res.status(201).json({
       success: true,
