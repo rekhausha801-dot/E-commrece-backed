@@ -5,7 +5,7 @@ import Subcategory from "../models/Subcategory.js";
 // @route   POST /api/categories
 export const createCategory = async (req, res) => {
   try {
-    const { name, description, image } = req.body;
+    const { name, description, image, icon } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({
@@ -26,6 +26,7 @@ export const createCategory = async (req, res) => {
       name: name.trim(),
       description: description ? description.trim() : "",
       image: image || "",
+      icon: icon || "",
       status: "active",
     });
 
@@ -100,7 +101,7 @@ export const getCategoryById = async (req, res) => {
 // @route   PUT /api/categories/:id
 export const updateCategory = async (req, res) => {
   try {
-    const { name, description, image, status } = req.body;
+    const { name, description, image, icon, status } = req.body;
 
     let category = await Category.findById(req.params.id);
 
@@ -124,6 +125,7 @@ export const updateCategory = async (req, res) => {
 
     if (description !== undefined) category.description = description.trim();
     if (image !== undefined) category.image = image;
+    if (icon !== undefined) category.icon = icon;
     if (status !== undefined) {
       if (!["active", "inactive"].includes(status)) {
         return res.status(400).json({

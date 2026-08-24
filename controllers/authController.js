@@ -15,6 +15,21 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
     
     if (password !== confirmPassword) {
       return res.status(400).json({
@@ -45,9 +60,9 @@ export const registerUser = async (req, res) => {
 
    
     const user = await User.create({
-      name: fullName,
+      fullName,
       email,
-      phone: mobile,
+      phoneNumber: mobile,
       password: hashedPassword,
       termsAccepted,
     });
@@ -58,9 +73,10 @@ export const registerUser = async (req, res) => {
       message: "Account created successfully",
       user: {
         id: user._id,
-        name: user.name,
+        fullName: user.fullName,
         email: user.email,
-        phone: user.phone,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -90,9 +106,13 @@ export const loginUser = async (req, res) => {
         token: generateToken(user._id),
         user: {
           id: user._id,
-          name: user.name,
+          fullName: user.fullName,
           email: user.email,
-          phone: user.phone
+          phoneNumber: user.phoneNumber,
+          profileImage: user.profileImage,
+          dateOfBirth: user.dateOfBirth,
+          gender: user.gender,
+          role: user.role
         }
       });
     } else {
@@ -108,16 +128,58 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select('-password');
 
     if (user) {
       res.json({
-        message: 'Profile retrieved'
+        success: true,
+        user
       });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      // Exclude password and role from being updated here
+      user.fullName = req.body.fullName || user.fullName;
+      user.email = req.body.email || user.email;
+      user.phoneNumber = req.body.phone || user.phoneNumber; // frontend sends 'phone'
+      user.profileImage = req.body.profileImage || user.profileImage;
+      user.dateOfBirth = req.body.dateOfBirth || user.dateOfBirth;
+      user.gender = req.body.gender || user.gender;
+
+      const updatedUser = await user.save();
+
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user: {
+          _id: updatedUser._id,
+          fullName: updatedUser.fullName,
+          email: updatedUser.email,
+          phoneNumber: updatedUser.phoneNumber,
+          profileImage: updatedUser.profileImage,
+          dateOfBirth: updatedUser.dateOfBirth,
+          gender: updatedUser.gender,
+          role: updatedUser.role,
+        },
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error during profile update' });
   }
 };
