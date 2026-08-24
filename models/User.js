@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    phone: {
+    phoneNumber: {
       type: String,
       required: true,
       trim: true,
@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       enum: ["Male", "Female", "Other"],
+    },
+    role: {
+      type: String,
+      default: "user",
     },
   },
   { timestamps: true }

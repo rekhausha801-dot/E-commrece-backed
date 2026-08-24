@@ -6,12 +6,8 @@ import { fileURLToPath } from 'url';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import brandRoutes from './routes/brandRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
-import customerRoutes from './routes/customerRoutes.js';
-import offerRoutes from './routes/offerRoutes.js';
-import couponRoutes from './routes/couponRoutes.js';
-import bannerRoutes from './src/routes/banner.routes.js';
+import subcategoryRoutes from './routes/subcategoryRoutes.js';
 
 dotenv.config();
 
@@ -22,7 +18,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -31,12 +28,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/brands', brandRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/offers', offerRoutes);
-app.use('/api/coupons', couponRoutes);
-app.use('/api/banners', bannerRoutes);
+app.use('/api/subcategories', subcategoryRoutes);
 
 // Base route
 app.get('/', (req, res) => {
