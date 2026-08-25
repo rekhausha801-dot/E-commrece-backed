@@ -4,13 +4,13 @@ import path from 'path';
 
 export const createBanner = async (req, res) => {
   try {
-    const { title, description, type, textPosition, link, status, startDate, endDate } = req.body;
+    const { title, description, type, textPosition, placement, link, status, startDate, endDate } = req.body;
     let image = '';
     
     if (req.file) {
       image = `/uploads/banners/${req.file.filename}`;
-    } else {
-      return res.status(400).json({ success: false, message: 'Image is required' });
+    } else if (type !== 'text') {
+      return res.status(400).json({ success: false, message: 'Media file is required for this banner type' });
     }
 
     const banner = await Banner.create({
@@ -18,6 +18,7 @@ export const createBanner = async (req, res) => {
       description,
       type,
       textPosition,
+      placement,
       image,
       link,
       status: status === 'true' || status === true,
@@ -73,6 +74,7 @@ export const updateBanner = async (req, res) => {
       description,
       type,
       textPosition,
+      placement,
       link,
       status: status === 'true' || status === true,
       startDate,
