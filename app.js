@@ -8,11 +8,11 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import subcategoryRoutes from './routes/subcategoryRoutes.js';
+import brandRoutes from './routes/brandRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import bannerRoutes from './src/routes/banner.routes.js';
-import brandRoutes from './routes/brandRoutes.js';
-import customerRoutes from './routes/customerRoutes.js';
 
 dotenv.config();
 
@@ -35,11 +35,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subcategories', subcategoryRoutes);
+app.use('/api/brands', brandRoutes);
 app.use('/api/offers', offerRoutes);
+app.use('/api/customers', customerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/banners', bannerRoutes);
-app.use('/api/brands', brandRoutes);
-app.use('/api/customers', customerRoutes);
 
 // Base route
 app.get('/', (req, res) => {
