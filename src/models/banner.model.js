@@ -10,8 +10,12 @@ const bannerSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['with_text', 'without_text'],
+    enum: ['with_text', 'without_text', 'video', 'text'],
     default: 'with_text'
+  },
+  placement: {
+    type: String,
+    default: 'Home - Hero'
   },
   textPosition: {
     type: String,
@@ -20,7 +24,7 @@ const bannerSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: [true, 'Please add an image']
+    required: function() { return this.type !== 'text'; }
   },
   link: {
     type: String
