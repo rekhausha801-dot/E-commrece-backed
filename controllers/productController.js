@@ -237,6 +237,7 @@ export const createProduct = async (req, res) => {
       data: product
     });
   } catch (error) {
+    import('fs').then(fs => fs.appendFileSync('./scratch/error.log', new Date().toISOString() + ': ' + error.stack + '\n'));
     res.status(400).json({ success: false, message: 'Failed to create product', error: error.message });
   }
 };
