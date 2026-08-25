@@ -3,7 +3,7 @@ import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.j
 
 // Helper function to parse FormData JSON strings
 const parseFormDataFields = (data) => {
-  const fieldsToParse = ['colors', 'sizes', 'tags', 'specs', 'sizeGuide', 'faqs', 'relatedProducts', 'designs', 'images'];
+  const fieldsToParse = ['colors', 'sizes', 'tags', 'specs', 'sizeGuide', 'faqs', 'relatedProducts', 'designs', 'images', 'limitedOfferDetails'];
   fieldsToParse.forEach(field => {
     if (typeof data[field] === 'string') {
       try {
@@ -13,25 +13,37 @@ const parseFormDataFields = (data) => {
       }
     }
   });
+
+  if (data.limitedOfferDetails) {
+    if (data.limitedOfferDetails.offerPrice === "" || data.limitedOfferDetails.offerPrice === null) delete data.limitedOfferDetails.offerPrice;
+    if (data.limitedOfferDetails.startDate === "" || data.limitedOfferDetails.startDate === null) delete data.limitedOfferDetails.startDate;
+    if (data.limitedOfferDetails.endDate === "" || data.limitedOfferDetails.endDate === null) delete data.limitedOfferDetails.endDate;
+    if (data.limitedOfferDetails.stockLimit === "" || data.limitedOfferDetails.stockLimit === null) delete data.limitedOfferDetails.stockLimit;
+  }
+  
+  if (data.isLimitedOffer === 'true') data.isLimitedOffer = true;
+  if (data.isLimitedOffer === 'false') data.isLimitedOffer = false;
+  if (data.limitedOfferEndDate === "") data.limitedOfferEndDate = null;
+
   return data;
 };
 
 // Search Products with filtering, pagination, and sorting
 export const searchProducts = async (req, res) => {
   try {
-    const { 
-      q, 
-      category, 
-      subCategory, 
-      brand, 
-      minPrice, 
-      maxPrice, 
-      rating, 
-      size, 
-      color, 
-      sort, 
-      page = 1, 
-      limit = 20 
+    const {
+      q,
+      category,
+      subCategory,
+      brand,
+      minPrice,
+      maxPrice,
+      rating,
+      size,
+      color,
+      sort,
+      page = 1,
+      limit = 20
     } = req.query;
 
     let query = {};
@@ -52,13 +64,13 @@ export const searchProducts = async (req, res) => {
     if (category) query.category = new RegExp(`^${category}$`, 'i');
     if (subCategory) query.subCategory = new RegExp(`^${subCategory}$`, 'i');
     if (brand) query.brand = new RegExp(`^${brand}$`, 'i');
-    
+
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    
+
     if (rating) query.rating = { $gte: Number(rating) };
     if (size) query.sizes = { $in: size.split(',') }; // Assuming size could be comma separated
     if (color) query.colors = { $in: color.split(',') };
@@ -84,7 +96,7 @@ export const searchProducts = async (req, res) => {
       default:
         // relevance - if q is provided, we can sort by text score, but regex doesn't have score.
         // We will default to newest or score if using text search.
-        sortOptions = { createdAt: -1 }; 
+        sortOptions = { createdAt: -1 };
         break;
     }
 
@@ -147,7 +159,7 @@ export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
     const products = await Product.find({ category: categoryId }).populate('category');
-    
+
     // Filter active category products only if category exists and is active
     const activeProducts = products.filter(p => p.category && p.category.status === 'active');
 
@@ -165,7 +177,7 @@ export const createProduct = async (req, res) => {
   try {
     let productData = { ...req.body };
     productData = parseFormDataFields(productData);
-    
+
     // Auto-generate SKU if not provided
     if (!productData.sku) {
       let prefix = 'PRD'; // Default fallback prefix
@@ -175,11 +187,11 @@ export const createProduct = async (req, res) => {
 
         const Category = (await import('../models/Category.js')).default;
         const categoryDoc = await Category.findById(productData.category);
-        
+
         if (categoryDoc && categoryDoc.name) {
           // Take first 4 characters of category name, uppercase
           const catPrefix = categoryDoc.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-          
+
           if (productData.subCategory) {
             // Take first 2 characters of subcategory, uppercase
             const subCatPrefix = productData.subCategory.replace(/[^a-zA-Z0-9]/g, '').substring(0, 2).toUpperCase();
@@ -193,7 +205,7 @@ export const createProduct = async (req, res) => {
       // Find the last created product with this specific prefix to determine the next SKU number
       const lastProduct = await Product.findOne({ sku: new RegExp(`^${prefix}-`) }).sort({ _id: -1 });
       let nextNum = 1;
-      
+
       if (lastProduct && lastProduct.sku) {
         // Extract the number part from the end of the SKU
         const parts = lastProduct.sku.split('-');
@@ -212,9 +224,9 @@ export const createProduct = async (req, res) => {
     // Explicitly check for duplicate SKU to provide a better error message
     const existingSku = await Product.findOne({ sku: productData.sku });
     if (existingSku) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `SKU '${productData.sku}' already exists. Please choose a different SKU.` 
+      return res.status(400).json({
+        success: false,
+        message: `SKU '${productData.sku}' already exists. Please choose a different SKU.`
       });
     }
 
@@ -245,7 +257,7 @@ export const updateProduct = async (req, res) => {
   try {
     let productData = { ...req.body };
     productData = parseFormDataFields(productData);
-    
+
     const existingProduct = await Product.findById(req.params.id);
     if (!existingProduct) {
       return res.status(404).json({ success: false, error: 'Product not found' });
@@ -273,14 +285,14 @@ export const updateProduct = async (req, res) => {
         });
       }
     }
-    
+
     productData.images = existingImages;
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, {
       new: true,
       runValidators: true
     });
-    
+
     res.json({
       success: true,
       data: product
@@ -307,7 +319,7 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
-    
+
     res.json({
       success: true,
       data: {}
@@ -326,10 +338,10 @@ export const getNextSku = async (req, res) => {
     if (category) {
       const Category = (await import('../models/Category.js')).default;
       const categoryDoc = await Category.findById(category);
-      
+
       if (categoryDoc && categoryDoc.name) {
         const catPrefix = categoryDoc.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-        
+
         if (subCategory) {
           const subCatPrefix = subCategory.replace(/[^a-zA-Z0-9]/g, '').substring(0, 2).toUpperCase();
           prefix = `${catPrefix}-${subCatPrefix}`;
@@ -342,7 +354,7 @@ export const getNextSku = async (req, res) => {
     // Find the last created product with this specific prefix
     const lastProduct = await Product.findOne({ sku: new RegExp(`^${prefix}-`) }).sort({ _id: -1 });
     let nextNum = 1;
-    
+
     if (lastProduct && lastProduct.sku) {
       const parts = lastProduct.sku.split('-');
       const lastNum = parseInt(parts[parts.length - 1], 10);
@@ -355,7 +367,7 @@ export const getNextSku = async (req, res) => {
     }
 
     const nextSku = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
-    
+
     res.json({
       success: true,
       sku: nextSku

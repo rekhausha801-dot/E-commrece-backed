@@ -133,6 +133,24 @@ const productSchema = new mongoose.Schema({
   seoTitle: String,
   seoDesc: String,
   seoKeywords: String,
+  homeSection: {
+    type: String,
+    enum: ['None', 'Trending', 'Limited Offers', 'New Arrivals', 'Best Sellers', 'Featured'],
+    default: 'None'
+  },
+  limitedOfferDetails: {
+    offerPrice: { type: Number },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    stockLimit: { type: Number }
+  },
+  isLimitedOffer: {
+    type: Boolean,
+    default: false
+  },
+  limitedOfferEndDate: {
+    type: Date
+  },
   relatedProducts: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product'
@@ -142,10 +160,10 @@ const productSchema = new mongoose.Schema({
 });
 
 // Indexes for text search
-productSchema.index({ 
-  name: 'text', 
-  brand: 'text', 
-  subCategory: 'text' 
+productSchema.index({
+  name: 'text',
+  brand: 'text',
+  subCategory: 'text'
 }, {
   weights: {
     name: 10,
@@ -160,7 +178,7 @@ productSchema.index({ price: 1 });
 productSchema.index({ rating: -1 });
 
 // Add custom validation for discount based on discountType
-productSchema.pre('validate', function(next) {
+productSchema.pre('validate', function (next) {
   if (this.discount > 0) {
     if (this.discountType === 'Percentage' && this.discount > 100) {
       this.invalidate('discount', 'Percentage discount cannot exceed 100%');
