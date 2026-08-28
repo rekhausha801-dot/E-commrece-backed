@@ -134,6 +134,38 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// @desc    Auth admin & get token
+// @route   POST /api/auth/admin/login
+// @access  Public
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email }).select('+password');
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      if (user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+      }
+      res.json({
+        success: true,
+        message: 'Admin Login successful',
+        token: generateToken(user._id),
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role
+        }
+      });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 // @access  Private

@@ -58,6 +58,17 @@ const productSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  gstRate: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+  gstIncludedInPrice: {
+    type: Boolean,
+    default: false
+  },
   // --- newly added missing fields ---
   sku: {
     type: String,
