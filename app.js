@@ -63,6 +63,17 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/admin/settings/preferences', preferencesRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
+// Help & Support Routes
+app.use('/api/support/dashboard', supportDashboardRoutes);
+app.use('/api/support/tickets', supportTicketRoutes);
+app.use('/api/admin/support/tickets', adminTicketRoutes);
+app.use('/api/support/tickets', supportMessageRoutes);
+app.use('/api/admin/support/tickets', supportMessageRoutes); // To allow admin replies to /api/admin/support/tickets/:id/reply
+app.use('/api', faqRoutes); // Mount at /api so /support/faqs and /admin/faqs can be configured in the route file
+app.use('/api', knowledgeBaseRoutes);
+app.use('/api', guideRoutes);
+app.use('/api/support/search', supportSearchRoutes);
+
 // Base route
 app.get('/', (req, res) => {
   res.send('E-Commerce API is running...');
