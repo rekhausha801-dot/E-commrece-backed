@@ -13,6 +13,14 @@ import offerRoutes from './routes/offerRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import bannerRoutes from './src/routes/banner.routes.js';
+import supportDashboardRoutes from './routes/supportDashboard.routes.js';
+import supportTicketRoutes from './routes/supportTicket.routes.js';
+import adminTicketRoutes from './routes/adminTicket.routes.js';
+import supportMessageRoutes from './routes/supportMessage.routes.js';
+import faqRoutes from './routes/faq.routes.js';
+import knowledgeBaseRoutes from './routes/knowledgeBase.routes.js';
+import guideRoutes from './routes/guide.routes.js';
+import supportSearchRoutes from './routes/supportSearch.routes.js';
 
 dotenv.config();
 
@@ -40,6 +48,17 @@ app.use('/api/offers', offerRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/banners', bannerRoutes);
+
+// Help & Support Routes
+app.use('/api/support/dashboard', supportDashboardRoutes);
+app.use('/api/support/tickets', supportTicketRoutes);
+app.use('/api/admin/support/tickets', adminTicketRoutes);
+app.use('/api/support/tickets', supportMessageRoutes);
+app.use('/api/admin/support/tickets', supportMessageRoutes); // To allow admin replies to /api/admin/support/tickets/:id/reply
+app.use('/api', faqRoutes); // Mount at /api so /support/faqs and /admin/faqs can be configured in the route file
+app.use('/api', knowledgeBaseRoutes);
+app.use('/api', guideRoutes);
+app.use('/api/support/search', supportSearchRoutes);
 
 // Base route
 app.get('/', (req, res) => {

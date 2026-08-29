@@ -151,6 +151,9 @@ export const getProductById = async (req, res) => {
       data: product
     });
   } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(404).json({ success: false, error: 'Product not found (Invalid ID)' });
+    }
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };

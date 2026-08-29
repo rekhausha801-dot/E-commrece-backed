@@ -1,0 +1,10 @@
+2026-08-29T07:11:27.962Z: ValidationError: Product validation failed: name: Path `name` is required.
+    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
+    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
+    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-08-29T09:28:27.591Z: ValidationError: Product validation failed: name: Path `name` is required.
+    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
+    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
+    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
