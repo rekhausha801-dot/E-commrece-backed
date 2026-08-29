@@ -13,14 +13,17 @@ import offerRoutes from './routes/offerRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import bannerRoutes from './src/routes/banner.routes.js';
-import supportDashboardRoutes from './routes/supportDashboard.routes.js';
-import supportTicketRoutes from './routes/supportTicket.routes.js';
-import adminTicketRoutes from './routes/adminTicket.routes.js';
-import supportMessageRoutes from './routes/supportMessage.routes.js';
-import faqRoutes from './routes/faq.routes.js';
-import knowledgeBaseRoutes from './routes/knowledgeBase.routes.js';
-import guideRoutes from './routes/guide.routes.js';
-import supportSearchRoutes from './routes/supportSearch.routes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import adminReviewRoutes from './routes/adminReviewRoutes.js';
+import checkoutRoutes from './routes/checkoutRoutes.js';
+import addressRoutes from './routes/addressRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import shippingRoutes from './routes/shippingRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
+import preferencesRoutes from './routes/preferencesRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 dotenv.config();
 
@@ -48,6 +51,17 @@ app.use('/api/offers', offerRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin/reviews', adminReviewRoutes);
+app.use('/api/checkout', checkoutRoutes);
+app.use('/api/addresses', addressRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/shipping', shippingRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/admin/settings/preferences', preferencesRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Help & Support Routes
 app.use('/api/support/dashboard', supportDashboardRoutes);
