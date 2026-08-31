@@ -1,3 +1,4 @@
+import { createCustomerNotification } from './customerNotification.controller.js';
 import SupportMessage from '../models/SupportMessage.model.js';
 import SupportTicket from '../models/SupportTicket.model.js';
 
@@ -54,6 +55,15 @@ export const replyToTicket = async (req, res) => {
     if (isAdmin) {
       ticket.adminReply = message;
       await ticket.save();
+      
+      // Notify customer
+      await createCustomerNotification({
+        user: ticket.user,
+        type: 'Ticket',
+        title: `Update on Support Ticket #${ticket.ticketNumber || ticket._id}`,
+        message: `An admin has replied to your support ticket: "${message.substring(0, 50)}..."`,
+        link: `/account/support/${ticket._id}`
+      });
     }
 
     res.status(201).json({ success: true, message: 'Reply sent successfully', data: newMessage });

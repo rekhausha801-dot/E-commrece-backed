@@ -27,9 +27,11 @@ export const getOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const { search, orderStatus, paymentStatus, paymentMethod } = req.query;
+    const { search, orderStatus, paymentStatus, paymentMethod, user } = req.query;
 
     let query = {};
+
+    if (user) query['customer.customerId'] = user;
 
     if (orderStatus) query.orderStatus = orderStatus;
     if (paymentStatus) query.paymentStatus = paymentStatus;

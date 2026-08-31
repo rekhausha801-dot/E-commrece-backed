@@ -1,3 +1,4 @@
+import { createCustomerNotification } from './customerNotification.controller.js';
 import SupportTicket from '../models/SupportTicket.model.js';
 import { createTicket, updateTicketStatus } from '../services/supportTicket.service.js';
 
@@ -249,6 +250,16 @@ export const resolveTicket = async (req, res) => {
       actionRequired: false
     }, { new: true });
     if (!ticket) return res.status(404).json({ success: false, message: 'Ticket not found' });
+    
+    // Notify customer about ticket resolution/reply
+    await createCustomerNotification({
+      user: ticket.user,
+      type: 'Ticket',
+      title: `Update on Support Ticket #${ticket.ticketNumber || ticket._id}`,
+      message: `Your support ticket has been resolved: "${(resolution || '').substring(0, 50)}..."`,
+      link: `/account/support`
+    });
+    
     res.status(200).json({ success: true, message: 'Ticket resolved', data: ticket });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });

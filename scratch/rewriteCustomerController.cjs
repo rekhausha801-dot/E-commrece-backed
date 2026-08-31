@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = '../server/controllers/customerController.js';
 
+const newCode = `
 import User from '../models/User.js';
 import Order from '../models/orderModel.js';
 import mongoose from 'mongoose';
@@ -107,3 +110,6 @@ export const createCustomer = async (req, res) => { res.status(200).json({ succe
 export const updateCustomer = async (req, res) => { res.status(200).json({ success: true }); };
 export const updateCustomerStatus = async (req, res) => { res.status(200).json({ success: true }); };
 export const deleteCustomer = async (req, res) => { res.status(200).json({ success: true }); };
+`;
+
+fs.writeFileSync(path, newCode);

@@ -7,7 +7,7 @@ export const getDashboardStats = async (req, res) => {
   try {
     // 1. Top level KPIs
     const totalProducts = await Product.countDocuments();
-    const totalCustomers = await User.countDocuments({ role: 'customer' });
+    const totalCustomers = await User.countDocuments({ role: { $in: ['user', 'customer'] } });
     const totalOrders = await Order.countDocuments();
 
     // Calculate total revenue from all Delivered orders

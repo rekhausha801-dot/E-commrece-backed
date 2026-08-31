@@ -54,6 +54,8 @@ const orderSchema = new mongoose.Schema(
     tax: { type: Number, default: 0 },
     gstAmount: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
+    couponCode: { type: String, default: null },
+    channel: { type: String, default: 'Website' },
     paymentMethod: {
       type: { type: String, required: true }, // e.g. cod, online, wallet
       method: { type: String },

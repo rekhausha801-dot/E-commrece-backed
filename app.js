@@ -1,3 +1,4 @@
+import customerNotificationRoutes from './routes/customerNotification.routes.js';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -24,6 +25,16 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import preferencesRoutes from './routes/preferencesRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import supportDashboardRoutes from './routes/supportDashboard.routes.js';
+import supportTicketRoutes from './routes/supportTicket.routes.js';
+import adminTicketRoutes from './routes/adminTicket.routes.js';
+import supportMessageRoutes from './routes/supportMessage.routes.js';
+import faqRoutes from './routes/faq.routes.js';
+import knowledgeBaseRoutes from './routes/knowledgeBase.routes.js';
+import guideRoutes from './routes/guide.routes.js';
+import supportSearchRoutes from './routes/supportSearch.routes.js';
+import reportsRoutes from './routes/reports.routes.js';
+import customerAnalyticsRoutes from './routes/customerAnalytics.routes.js';
 
 dotenv.config();
 
@@ -59,9 +70,12 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/shipping', shippingRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/customer/notifications', customerNotificationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin/settings/preferences', preferencesRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/admin/reports', reportsRoutes);
+app.use('/api/customer/analytics', customerAnalyticsRoutes);
 
 // Help & Support Routes
 app.use('/api/support/dashboard', supportDashboardRoutes);
