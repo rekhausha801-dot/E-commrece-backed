@@ -71,6 +71,10 @@ app.use('/api/payments', paymentRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
+  if (err.name === 'CastError' && err.kind === 'ObjectId') {
+    return res.status(400).json({ success: false, message: 'Invalid ID format' });
+  }
+
   console.error(err);
   if (err instanceof require('multer').MulterError) {
     return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
