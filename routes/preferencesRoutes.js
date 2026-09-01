@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import { getPreferences, updatePreferences } from '../controllers/preferencesController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 

@@ -4,7 +4,7 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/dashboard', protect, admin, getDashboardStats);
-router.get('/ratings', protect, admin, getRatingBreakdown);
+router.get('/dashboard', getDashboardStats);
+router.get('/ratings', getRatingBreakdown);
 
 export default router;
