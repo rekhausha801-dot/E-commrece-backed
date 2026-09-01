@@ -67,7 +67,7 @@ export const updateBanner = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Banner not found' });
     }
 
-    const { title, description, type, textPosition, link, status, startDate, endDate } = req.body;
+    const { title, description, type, textPosition, placement, link, status, startDate, endDate } = req.body;
 
     const updateData = {
       title,
