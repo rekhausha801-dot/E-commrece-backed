@@ -55,10 +55,6 @@ const reviewSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    helpfulCount: {
-      type: Number,
-      default: 0,
-    },
   },
   {
     timestamps: true,

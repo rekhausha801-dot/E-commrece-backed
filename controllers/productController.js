@@ -173,61 +173,62 @@ export const getProductsByCategory = async (req, res) => {
   }
 };
 
+export const generateUniqueSku = async (category, subCategory) => {
+  let prefix = 'PRD'; // Default fallback prefix
+
+  // Try to fetch Category to create a meaningful prefix
+  if (category) {
+    try {
+      const Category = (await import('../models/Category.js')).default;
+      const categoryDoc = await Category.findById(category);
+
+      if (categoryDoc && categoryDoc.name) {
+        const catPrefix = categoryDoc.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+
+        if (subCategory) {
+          const subCatPrefix = subCategory.replace(/[^a-zA-Z0-9]/g, '').substring(0, 2).toUpperCase();
+          prefix = `${catPrefix}-${subCatPrefix}`;
+        } else {
+          prefix = catPrefix;
+        }
+      }
+    } catch (e) {
+      console.error('Error finding category for SKU prefix:', e);
+    }
+  }
+
+  // Find all products matching prefix to find true max number
+  const productsWithPrefix = await Product.find({ sku: new RegExp(`^${prefix}-`, 'i') }, { sku: 1 });
+  let maxNum = 0;
+  for (const p of productsWithPrefix) {
+    if (p.sku) {
+      const parts = p.sku.split('-');
+      const num = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    }
+  }
+
+  let nextNum = maxNum + 1;
+  let candidateSku = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
+
+  while (await Product.findOne({ sku: candidateSku })) {
+    nextNum++;
+    candidateSku = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
+  }
+
+  return candidateSku;
+};
+
 export const createProduct = async (req, res) => {
   try {
     let productData = { ...req.body };
     productData = parseFormDataFields(productData);
 
-    // Auto-generate SKU if not provided
-    if (!productData.sku) {
-      let prefix = 'PRD'; // Default fallback prefix
-
-      // Try to fetch Category to create a meaningful prefix
-      if (productData.category) {
-
-        const Category = (await import('../models/Category.js')).default;
-        const categoryDoc = await Category.findById(productData.category);
-
-        if (categoryDoc && categoryDoc.name) {
-          // Take first 4 characters of category name, uppercase
-          const catPrefix = categoryDoc.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-
-          if (productData.subCategory) {
-            // Take first 2 characters of subcategory, uppercase
-            const subCatPrefix = productData.subCategory.replace(/[^a-zA-Z0-9]/g, '').substring(0, 2).toUpperCase();
-            prefix = `${catPrefix}-${subCatPrefix}`;
-          } else {
-            prefix = catPrefix;
-          }
-        }
-      }
-
-      // Find the last created product with this specific prefix to determine the next SKU number
-      const lastProduct = await Product.findOne({ sku: new RegExp(`^${prefix}-`) }).sort({ _id: -1 });
-      let nextNum = 1;
-
-      if (lastProduct && lastProduct.sku) {
-        // Extract the number part from the end of the SKU
-        const parts = lastProduct.sku.split('-');
-        const lastNum = parseInt(parts[parts.length - 1], 10);
-        if (!isNaN(lastNum)) {
-          nextNum = lastNum + 1;
-        } else {
-          const count = await Product.countDocuments({ sku: new RegExp(`^${prefix}-`) });
-          nextNum = count + 1;
-        }
-      }
-
-      productData.sku = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
-    }
-
-    // Explicitly check for duplicate SKU to provide a better error message
-    const existingSku = await Product.findOne({ sku: productData.sku });
-    if (existingSku) {
-      return res.status(400).json({
-        success: false,
-        message: `SKU '${productData.sku}' already exists. Please choose a different SKU.`
-      });
+    // Auto-generate or deduplicate SKU if not provided or already exists
+    if (!productData.sku || (await Product.findOne({ sku: productData.sku }))) {
+      productData.sku = await generateUniqueSku(productData.category, productData.subCategory);
     }
 
     // Handle Image Uploads
@@ -333,41 +334,7 @@ export const deleteProduct = async (req, res) => {
 export const getNextSku = async (req, res) => {
   try {
     const { category, subCategory } = req.query;
-    let prefix = 'PRD'; // Default fallback prefix
-
-    // Try to fetch Category to create a meaningful prefix
-    if (category) {
-      const Category = (await import('../models/Category.js')).default;
-      const categoryDoc = await Category.findById(category);
-
-      if (categoryDoc && categoryDoc.name) {
-        const catPrefix = categoryDoc.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-
-        if (subCategory) {
-          const subCatPrefix = subCategory.replace(/[^a-zA-Z0-9]/g, '').substring(0, 2).toUpperCase();
-          prefix = `${catPrefix}-${subCatPrefix}`;
-        } else {
-          prefix = catPrefix;
-        }
-      }
-    }
-
-    // Find the last created product with this specific prefix
-    const lastProduct = await Product.findOne({ sku: new RegExp(`^${prefix}-`) }).sort({ _id: -1 });
-    let nextNum = 1;
-
-    if (lastProduct && lastProduct.sku) {
-      const parts = lastProduct.sku.split('-');
-      const lastNum = parseInt(parts[parts.length - 1], 10);
-      if (!isNaN(lastNum)) {
-        nextNum = lastNum + 1;
-      } else {
-        const count = await Product.countDocuments({ sku: new RegExp(`^${prefix}-`) });
-        nextNum = count + 1;
-      }
-    }
-
-    const nextSku = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
+    const nextSku = await generateUniqueSku(category, subCategory);
 
     res.json({
       success: true,
