@@ -45,8 +45,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
 // Serve static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -68,6 +68,18 @@ app.use('/api/admin/reviews', adminReviewRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/payments', paymentRoutes);
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (err instanceof require('multer').MulterError) {
+    return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
+  } else if (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+  next();
+});
+
 app.use('/api/shipping', shippingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/customer/notifications', customerNotificationRoutes);
