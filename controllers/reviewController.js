@@ -1,55 +1,119 @@
+import mongoose from 'mongoose';
 import Review from '../models/Review.js';
 import Product from '../models/Product.js';
 import Order from '../models/orderModel.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
-import { getProductRatingSummary as getSummaryService } from '../services/reviewRatingService.js';
+import { updateProductRating, getProductRatingSummary as getSummaryService } from '../services/reviewRatingService.js';
 
-// @desc    Create new review
+// @desc    Create or update review
 // @route   POST /api/reviews
 // @access  Private
 export const submitReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
 
-    const product = await Product.findById(productId);
+    if (!productId) {
+      return res.status(400).json({ success: false, message: 'Product ID is required' });
+    }
+
+    const numericRating = Number(rating);
+    if (!numericRating || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid rating between 1 and 5' });
+    }
+
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({ success: false, message: 'Please provide a review comment' });
+    }
+
+    let product = null;
+    if (mongoose.Types.ObjectId.isValid(productId)) {
+      product = await Product.findById(productId);
+    }
+    if (!product) {
+      product = await Product.findOne({ $or: [{ sku: productId }, { _id: productId }] });
+    }
+
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // Check verified purchase
-    const orders = await Order.find({ user: req.user._id, 'orderItems.product': productId });
-    const isVerifiedPurchase = orders.length > 0;
+    const actualProductId = product._id;
+
+    // Check verified purchase (Order customer.customerId and items.product)
+    let isVerifiedPurchase = false;
+    try {
+      const orders = await Order.find({
+        'customer.customerId': req.user._id,
+        'items.product': actualProductId,
+      });
+      isVerifiedPurchase = orders.length > 0;
+    } catch (orderErr) {
+      console.error('Error checking verified purchase:', orderErr);
+    }
 
     // Upload images if any
     const imageUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const result = await uploadToCloudinary(file.buffer, 'reviews');
-        imageUrls.push(result.secure_url);
+        try {
+          const result = await uploadToCloudinary(file.buffer, 'ecommerce/reviews');
+          if (result && result.secure_url) {
+            imageUrls.push(result.secure_url);
+          }
+        } catch (uploadErr) {
+          console.error('Cloudinary review image upload error:', uploadErr);
+        }
       }
     }
 
-    const review = new Review({
-      product: productId,
+    // Check if user already reviewed this product
+    let review = await Review.findOne({ product: actualProductId, user: req.user._id });
+
+    if (review) {
+      // Update existing review
+      review.rating = numericRating;
+      review.title = title ? title.trim() : review.title;
+      review.comment = comment.trim();
+      if (imageUrls.length > 0) {
+        review.images = [...(review.images || []), ...imageUrls];
+      }
+      review.isVerifiedPurchase = isVerifiedPurchase || review.isVerifiedPurchase;
+      review.status = 'approved';
+      await review.save();
+
+      await updateProductRating(actualProductId);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Review updated successfully!',
+        data: review,
+      });
+    }
+
+    // Create new review
+    review = new Review({
+      product: actualProductId,
       user: req.user._id,
-      rating: Number(rating),
-      title,
-      comment,
+      rating: numericRating,
+      title: title ? title.trim() : '',
+      comment: comment.trim(),
       images: imageUrls,
       isVerifiedPurchase,
-      status: 'pending', // Requires admin approval
+      status: 'approved',
     });
 
     await review.save();
 
+    await updateProductRating(actualProductId);
+
     res.status(201).json({
       success: true,
-      message: 'Review submitted successfully and is pending approval.',
+      message: 'Review submitted successfully!',
       data: review,
     });
   } catch (error) {
     console.error('Submit review error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(400).json({ success: false, message: error.message || 'Failed to submit review' });
   }
 };
 
@@ -62,8 +126,14 @@ export const getProductReviews = async (req, res) => {
     const limit = Number(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    let targetProductId = req.params.productId;
+    if (!mongoose.Types.ObjectId.isValid(targetProductId)) {
+      const prod = await Product.findOne({ sku: targetProductId });
+      if (prod) targetProductId = prod._id;
+    }
+
     const filter = {
-      product: req.params.productId,
+      product: targetProductId,
       status: 'approved',
     };
 
@@ -77,7 +147,7 @@ export const getProductReviews = async (req, res) => {
     else if (req.query.sort === 'lowest') sortOption = { rating: 1 };
 
     const reviews = await Review.find(filter)
-      .populate('user', 'name profileImage')
+      .populate('user', 'fullName name profileImage')
       .sort(sortOption)
       .skip(skip)
       .limit(limit);

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Customer from "../models/customerModel.js";
 import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
@@ -225,5 +226,78 @@ export const updateUserProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error during profile update' });
+  }
+};
+
+// @desc    Update password
+export const updatePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const { currentPassword, newPassword } = req.body;
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Update security settings
+export const updateSecuritySettings = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const { twoFactor, newDeviceAlert } = req.body;
+    if (typeof twoFactor !== 'undefined') user.twoFactor = twoFactor;
+    if (typeof newDeviceAlert !== 'undefined') user.newDeviceAlert = newDeviceAlert;
+    await user.save();
+    res.json({ success: true, message: 'Security settings updated' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Get active sessions (stub - returns mock current session)
+export const getActiveSessions = async (req, res) => {
+  try {
+    const sessions = [
+      {
+        id: 'current',
+        device: 'Current Browser',
+        location: 'India',
+        time: 'Current Session',
+        isCurrent: true,
+      }
+    ];
+    res.json({ success: true, data: sessions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Revoke a specific session
+export const revokeSession = async (req, res) => {
+  try {
+    res.json({ success: true, message: 'Session revoked' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Revoke all sessions
+export const revokeAllSessions = async (req, res) => {
+  try {
+    res.json({ success: true, message: 'All sessions revoked' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
