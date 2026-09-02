@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import { OAuth2Client } from "google-auth-library";
 import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
@@ -225,5 +226,106 @@ export const updateUserProfile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error during profile update' });
+  }
+};
+
+
+const client = new OAuth2Client((process.env.GOOGLE_CLIENT_ID || "830862223596-dpe9lhl67h3tndc0n47888qec4j7cpcl.apps.googleusercontent.com"));
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    
+    if (!credential) {
+      return res.status(400).json({ success: false, message: "Missing credential" });
+    }
+    
+    // Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: (process.env.GOOGLE_CLIENT_ID || "830862223596-dpe9lhl67h3tndc0n47888qec4j7cpcl.apps.googleusercontent.com"),
+    });
+    
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return res.status(400).json({ success: false, message: "Invalid Google token" });
+    }
+    
+    const { email, name, picture, sub, email_verified } = payload;
+    
+    if (!email || !email_verified) {
+      return res.status(400).json({ success: false, message: "Unverified or missing email" });
+    }
+    
+    // Check if user exists
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // CASE 2 & 3: Link if needed
+      let updated = false;
+      if (!user.googleId) {
+        user.googleId = sub;
+        updated = true;
+      }
+      if (!user.provider || user.provider === 'local') {
+        user.provider = 'google';
+        updated = true;
+      }
+      if (!user.profileImage && picture) {
+        user.profileImage = picture;
+        updated = true;
+      }
+      
+      if (updated) {
+        await user.save();
+      }
+      
+      const tokenStr = generateToken(user._id);
+      return res.status(200).json({
+        success: true,
+        message: "Google login successful",
+        token: tokenStr,
+        user: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } else {
+      // CASE 1: Create new user
+      const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+      
+      user = await User.create({
+        fullName: name,
+        email,
+        password: hashedPassword,
+        profileImage: picture,
+        googleId: sub,
+        provider: 'google',
+        termsAccepted: true
+      });
+      
+      const tokenStr = generateToken(user._id);
+      return res.status(201).json({
+        success: true,
+        message: "Google login successful",
+        token: tokenStr,
+        user: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(401).json({
+      success: false,
+      message: "Google authentication failed",
+    });
   }
 };

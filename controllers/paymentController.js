@@ -21,7 +21,18 @@ export const processPayment = async (req, res) => {
     let productDiscount = 0;
 
     for (const item of items) {
-      const product = await Product.findById(item.productId || item.product);
+      
+      const idToSearch = item.productId || item.product;
+      let product;
+      try {
+        product = await Product.findById(idToSearch);
+      } catch (err) {
+        if (err.name === 'CastError') {
+           return res.status(400).json({ success: false, message: `Product ID ${idToSearch} is invalid. If you are using old cart items, please clear your cart.` });
+        }
+        throw err;
+      }
+
       if (!product || product.status !== 'Active') {
         return res.status(400).json({ success: false, message: `Product ${item.name || 'Unknown'} is not available` });
       }

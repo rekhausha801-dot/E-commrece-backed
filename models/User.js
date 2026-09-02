@@ -16,12 +16,10 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
       trim: true,
     },
     password: {
       type: String,
-      required: true,
       minlength: 6,
     },
     termsAccepted: {
@@ -43,6 +41,15 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "user",
+    },
+    provider: {
+      type: String,
+      default: "local",
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true
     },
   },
   { timestamps: true }

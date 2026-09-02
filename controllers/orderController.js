@@ -14,8 +14,10 @@ export const getMyOrders = async (req, res) => {
       data: orders
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Get all orders with search, filter, pagination
@@ -65,8 +67,10 @@ export const getOrders = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Get dashboard statistics for orders
@@ -110,8 +114,10 @@ export const getOrderStats = async (req, res) => {
       data: result
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Get single order by ID
@@ -136,8 +142,10 @@ export const getOrderById = async (req, res) => {
       order: order // added for frontend destructuring
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Create new order
@@ -191,7 +199,18 @@ export const createOrder = async (req, res) => {
     const productsToUpdate = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.productId || item.product);
+      
+      const idToSearch = item.productId || item.product;
+      let product;
+      try {
+        product = await Product.findById(idToSearch);
+      } catch (err) {
+        if (err.name === 'CastError') {
+           return res.status(400).json({ success: false, message: `Product ID ${idToSearch} is invalid. If you are using old cart items, please clear your cart.` });
+        }
+        throw err;
+      }
+
       if (!product || product.status !== 'Active') {
         return res.status(400).json({ success: false, message: `Product is unavailable or inactive.` });
       }
@@ -328,7 +347,7 @@ export const createOrder = async (req, res) => {
       checkoutType,
       customer: {
         customerId: req.user._id,
-        name: req.user.name || address.fullName,
+        name: req.user.fullName || req.user.name || address.fullName,
         email: req.user.email || 'customer@example.com'
       },
       items: orderItems,
@@ -372,11 +391,10 @@ export const createOrder = async (req, res) => {
       order: createdOrder // Include this so frontend destructuring 'response.order._id' works if they use it
     });
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(400).json({ success: false, message: 'Order ID already exists' });
-    }
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Update order
@@ -407,8 +425,10 @@ export const updateOrder = async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Update order status
@@ -438,8 +458,10 @@ export const updateOrderStatus = async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Cancel an order
@@ -521,8 +543,10 @@ export const cancelOrder = async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Process return request
@@ -554,8 +578,10 @@ export const processReturn = async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Process refund
@@ -584,8 +610,10 @@ export const processRefund = async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Export Orders as CSV
@@ -619,8 +647,10 @@ export const exportOrders = async (req, res) => {
     res.status(200).send(csvData);
 
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
 
 // @desc    Delete order
@@ -640,6 +670,8 @@ export const deleteOrder = async (req, res) => {
       message: 'Order deleted successfully'
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const fs = await import('fs');
+    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+}
 };
