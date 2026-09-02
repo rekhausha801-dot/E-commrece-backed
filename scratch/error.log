@@ -16,28 +16,15 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
     at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
-2026-08-31T09:24:27.698Z: ValidationError: Product validation failed: name: Path `name` is required.
-    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
-2026-08-31T09:24:27.737Z: ValidationError: Product validation failed: name: Path `name` is required.
-    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
-2026-08-31T09:24:29.416Z: ValidationError: Product validation failed: name: Path `name` is required.
-    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
-2026-08-31T09:24:29.484Z: ValidationError: Product validation failed: name: Path `name` is required.
-    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
-2026-08-31T09:24:37.251Z: ValidationError: Product validation failed: name: Path `name` is required.
-    at Document.invalidate (C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3387:32)
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\document.js:3148:17
-    at C:\Users\Devi\Downloads\E-Commerce\E-Commerce\server\node_modules\mongoose\lib\schemaType.js:1443:9
-    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-08-31T11:23:08.196Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "PRD-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-08-31T11:23:09.345Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "PRD-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)

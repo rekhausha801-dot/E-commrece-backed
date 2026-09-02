@@ -42,13 +42,13 @@ export const getDashboardStats = async (req, res) => {
     todayStart.setHours(0, 0, 0, 0);
 
     const totalProducts = await Product.countDocuments();
-    const totalCustomers = await User.countDocuments({ role: 'customer' });
-    const newCustomersToday = await User.countDocuments({ role: 'customer', createdAt: { $gte: todayStart } });
+    const totalCustomers = await User.countDocuments({ role: { $ne: 'admin' } });
+    const newCustomersToday = await User.countDocuments({ role: { $ne: 'admin' }, createdAt: { $gte: todayStart } });
 
     const totalOrders = await Order.countDocuments();
     const newOrdersToday = await Order.countDocuments({ createdAt: { $gte: todayStart } });
 
-    const validOrderStatuses = ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
+    const validOrderStatuses = ['Delivered'];
 
     const currentRevenueAggr = await Order.aggregate([
       { $match: { orderStatus: { $in: validOrderStatuses }, createdAt: { $gte: startDate } } },
