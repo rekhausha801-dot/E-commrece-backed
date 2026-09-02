@@ -44,7 +44,7 @@ export const getCustomerAnalytics = async (req, res) => {
       }
     });
 
-    // Format spending history for Recharts
+    
     const spendingChartData = Object.keys(spendingHistory).map(key => ({
       name: key,
       spent: spendingHistory[key]
