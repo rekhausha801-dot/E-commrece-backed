@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-import Customer from "../models/customerModel.js";
+import { OAuth2Client } from "google-auth-library";
 import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
@@ -229,75 +229,103 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Update password
-export const updatePassword = async (req, res) => {
+
+const client = new OAuth2Client((process.env.GOOGLE_CLIENT_ID || "830862223596-dpe9lhl67h3tndc0n47888qec4j7cpcl.apps.googleusercontent.com"));
+
+export const googleAuth = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const { currentPassword, newPassword } = req.body;
-    const isMatch = await user.matchPassword(currentPassword);
-    if (!isMatch) return res.status(400).json({ success: false, message: 'Current password is incorrect' });
-
-    user.password = newPassword;
-    await user.save();
-    res.json({ success: true, message: 'Password updated successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// @desc    Update security settings
-export const updateSecuritySettings = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const { twoFactor, newDeviceAlert } = req.body;
-    if (typeof twoFactor !== 'undefined') user.twoFactor = twoFactor;
-    if (typeof newDeviceAlert !== 'undefined') user.newDeviceAlert = newDeviceAlert;
-    await user.save();
-    res.json({ success: true, message: 'Security settings updated' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// @desc    Get active sessions (stub - returns mock current session)
-export const getActiveSessions = async (req, res) => {
-  try {
-    const sessions = [
-      {
-        id: 'current',
-        device: 'Current Browser',
-        location: 'India',
-        time: 'Current Session',
-        isCurrent: true,
+    const { credential } = req.body;
+    
+    if (!credential) {
+      return res.status(400).json({ success: false, message: "Missing credential" });
+    }
+    
+    // Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: (process.env.GOOGLE_CLIENT_ID || "830862223596-dpe9lhl67h3tndc0n47888qec4j7cpcl.apps.googleusercontent.com"),
+    });
+    
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return res.status(400).json({ success: false, message: "Invalid Google token" });
+    }
+    
+    const { email, name, picture, sub, email_verified } = payload;
+    
+    if (!email || !email_verified) {
+      return res.status(400).json({ success: false, message: "Unverified or missing email" });
+    }
+    
+    // Check if user exists
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // CASE 2 & 3: Link if needed
+      let updated = false;
+      if (!user.googleId) {
+        user.googleId = sub;
+        updated = true;
       }
-    ];
-    res.json({ success: true, data: sessions });
+      if (!user.provider || user.provider === 'local') {
+        user.provider = 'google';
+        updated = true;
+      }
+      if (!user.profileImage && picture) {
+        user.profileImage = picture;
+        updated = true;
+      }
+      
+      if (updated) {
+        await user.save();
+      }
+      
+      const tokenStr = generateToken(user._id);
+      return res.status(200).json({
+        success: true,
+        message: "Google login successful",
+        token: tokenStr,
+        user: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } else {
+      // CASE 1: Create new user
+      const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+      
+      user = await User.create({
+        fullName: name,
+        email,
+        password: hashedPassword,
+        profileImage: picture,
+        googleId: sub,
+        provider: 'google',
+        termsAccepted: true
+      });
+      
+      const tokenStr = generateToken(user._id);
+      return res.status(201).json({
+        success: true,
+        message: "Google login successful",
+        token: tokenStr,
+        user: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// @desc    Revoke a specific session
-export const revokeSession = async (req, res) => {
-  try {
-    res.json({ success: true, message: 'Session revoked' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// @desc    Revoke all sessions
-export const revokeAllSessions = async (req, res) => {
-  try {
-    res.json({ success: true, message: 'All sessions revoked' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Google auth error:", error);
+    res.status(401).json({
+      success: false,
+      message: "Google authentication failed",
+    });
   }
 };
