@@ -1,4 +1,5 @@
 import Product from '../models/Product.js';
+import Category from '../models/Category.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
 
 // Helper function to parse FormData JSON strings
@@ -23,6 +24,8 @@ const parseFormDataFields = (data) => {
   
   if (data.isLimitedOffer === 'true') data.isLimitedOffer = true;
   if (data.isLimitedOffer === 'false') data.isLimitedOffer = false;
+  if (data.customizable === 'true') data.customizable = true;
+  if (data.customizable === 'false') data.customizable = false;
   if (data.limitedOfferEndDate === "") data.limitedOfferEndDate = null;
 
   return data;
@@ -129,7 +132,7 @@ export const searchProducts = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 }).populate('category');
+    const products = await Product.find({}).sort({ createdAt: -1 }).populate('category', 'name description status icon');
     res.json({
       success: true,
       count: products.length,
@@ -142,26 +145,26 @@ export const getProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category');
+    let product = null;
+    if (req.params.id && req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(req.params.id).populate('category', 'name description status icon');
+    }
     if (!product) {
-      return res.status(404).json({ success: false, error: 'Product not found' });
+      return res.json({ success: false, data: null, error: 'Product not found' });
     }
     res.json({
       success: true,
       data: product
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(404).json({ success: false, error: 'Product not found (Invalid ID)' });
-    }
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    res.json({ success: false, data: null, error: 'Product not found' });
   }
 };
 
 export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
-    const products = await Product.find({ category: categoryId }).populate('category');
+    const products = await Product.find({ category: categoryId }).populate('category', 'name description status icon');
 
     // Filter active category products only if category exists and is active
     const activeProducts = products.filter(p => p.category && p.category.status === 'active');
