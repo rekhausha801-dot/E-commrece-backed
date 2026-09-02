@@ -118,6 +118,9 @@ const productSchema = new mongoose.Schema({
     id: String,
     name: String,
     icon: String,
+    iconName: String,
+    iconColor: String,
+    modelImage: String,
     category: String,
     price: Number
   }],
