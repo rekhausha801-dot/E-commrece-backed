@@ -28,3 +28,98 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
     at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T15:44:22.895Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T15:44:24.445Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T15:44:24.514Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T15:44:24.850Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-002" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T15:57:29.354Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:30.292Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:31.299Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:31.430Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:41.277Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:42.284Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T15:57:43.226Z: ValidationError: Product validation failed: homeSection: `Kurti Collection` is not a valid enum value for path `homeSection`.
+    at Document.invalidate (D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3387:32)
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\document.js:3148:17
+    at D:\New folder\E-commrece-backed\node_modules\mongoose\lib\schemaType.js:1443:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+2026-09-01T16:04:32.555Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-003" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-01T16:32:58.664Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "CUST-004" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-02T04:48:40.662Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "KURT-003" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-02T04:48:42.378Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "KURT-005" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-02T04:48:43.020Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "KURT-005" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)
+2026-09-02T04:48:44.508Z: MongoServerError: E11000 duplicate key error collection: ecommerce.products index: sku_1 dup key: { sku: "KURT-006" }
+    at InsertOneOperation.handleOk (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:214:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async Collection.insertOne (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\collection.js:154:16)

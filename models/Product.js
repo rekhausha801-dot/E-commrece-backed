@@ -146,7 +146,6 @@ const productSchema = new mongoose.Schema({
   seoKeywords: String,
   homeSection: {
     type: String,
-    enum: ['None', 'Trending', 'Limited Offers', 'New Arrivals', 'Best Sellers', 'Featured'],
     default: 'None'
   },
   limitedOfferDetails: {
