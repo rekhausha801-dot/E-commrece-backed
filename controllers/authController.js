@@ -83,6 +83,7 @@ export const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Account created successfully",
+      token: generateToken(user._id),
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -328,4 +329,32 @@ export const googleAuth = async (req, res) => {
       message: "Google authentication failed",
     });
   }
+};
+
+export const getActiveSessions = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: [
+        {
+          id: 'mock-session-1',
+          device: 'Windows PC - Chrome',
+          location: 'Chennai, India',
+          ipAddress: req.ip || '127.0.0.1',
+          lastActive: new Date(),
+          isCurrent: true
+        }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const revokeSession = async (req, res) => {
+  res.json({ success: true, message: 'Session revoked successfully' });
+};
+
+export const revokeAllSessions = async (req, res) => {
+  res.json({ success: true, message: 'All other sessions revoked successfully' });
 };

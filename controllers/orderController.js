@@ -153,7 +153,7 @@ export const getOrderById = async (req, res) => {
 // @access  Private
 export const createOrder = async (req, res) => {
   try {
-    const { checkoutType, items, addressId, paymentMethod, paymentId } = req.body;
+    const { checkoutType, items, addressId, paymentMethod, paymentId, couponCode, couponDiscount: clientCouponDiscount } = req.body;
 
     if (!checkoutType || !items || items.length === 0 || !addressId || !paymentMethod) {
       return res.status(400).json({ success: false, message: 'Missing required checkout information' });
@@ -263,6 +263,12 @@ export const createOrder = async (req, res) => {
         productImage: product.images && product.images.length > 0 ? product.images[0].url : '',
         selectedSize: item.size || item.selectedSize || '',
         selectedColor: item.color || item.selectedColor || '',
+        customText: item.customText || null,
+        customTextColor: item.customTextColor || null,
+        customTextFont: item.customTextFont || null,
+        selectedDesign: item.selectedDesign || null,
+        selectedDesignColor: item.selectedDesignColor || null,
+        colorizeImage: item.colorizeImage || false,
         quantity: item.quantity,
         originalPrice,
         discountAmount,
@@ -279,7 +285,7 @@ export const createOrder = async (req, res) => {
     }
 
     // 3. Pricing
-    const couponDiscount = 0; 
+    const couponDiscount = clientCouponDiscount || 0;
     let gstAmount = tax;
     let totalTaxableAmount = subtotal - productDiscount - couponDiscount;
     
@@ -329,6 +335,8 @@ export const createOrder = async (req, res) => {
     const successfulUpdates = [];
     try {
       for (const update of productsToUpdate) {
+        // Only update stock for real DB products (not fallback objects)
+        if (!update.product._id || update.product.countInStock === 999) continue;
         const result = await Product.updateOne(
           { _id: update.product._id, countInStock: { $gte: update.quantity } },
           { $inc: { countInStock: -update.quantity } }
@@ -371,7 +379,8 @@ export const createOrder = async (req, res) => {
       paymentId: paymentMethod.type === 'online' ? paymentId : undefined,
       shippingAddress: addressSnapshot,
       paymentStatus: finalPaymentStatus,
-      orderStatus: 'Pending'
+      orderStatus: 'Pending',
+      couponCode: couponCode ? couponCode.toUpperCase() : undefined
     });
 
     const createdOrder = await order.save();

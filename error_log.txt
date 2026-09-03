@@ -46,3 +46,37 @@ CastError: Cast to ObjectId failed for value "6" (type number) at path "_id" for
     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async createOrder (file:///C:/Users/Devi/Downloads/E-Commerce/E-Commerce/server/controllers/orderController.js:202:23)
 
+MongoPoolClearedError: Connection pool for ac-zvb8pli-shard-00-01.vnldimk.mongodb.net:27017 was cleared because another operation failed with: "connection 24 to 159.41.196.102:27017 closed"
+    at ConnectionPool.processWaitQueue (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:449:82)
+    at ConnectionPool.clear (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:243:14)
+    at updateServers (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:518:29)
+    at Topology.serverUpdateHandler (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:394:9)
+    at Server.<anonymous> (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:501:77)
+    at Server.emit (node:events:509:28)
+    at markServerUnknown (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:358:12)
+    at Server.handleError (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:249:17)
+    at D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:395:25
+
+MongoPoolClearedError: Connection pool for ac-zvb8pli-shard-00-01.vnldimk.mongodb.net:27017 was cleared because another operation failed with: "connection 24 to 159.41.196.102:27017 closed"
+    at ConnectionPool.processWaitQueue (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:449:82)
+    at ConnectionPool.clear (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:243:14)
+    at updateServers (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:518:29)
+    at Topology.serverUpdateHandler (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:394:9)
+    at Server.<anonymous> (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:501:77)
+    at Server.emit (node:events:509:28)
+    at markServerUnknown (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:358:12)
+    at Server.handleError (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:249:17)
+    at D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:395:25
+
+MongoPoolClearedError: Connection pool for ac-zvb8pli-shard-00-01.vnldimk.mongodb.net:27017 was cleared because another operation failed with: "read ECONNRESET"
+    at ConnectionPool.processWaitQueue (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:449:82)
+    at ConnectionPool.clear (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:243:14)
+    at updateServers (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:518:29)
+    at Topology.serverUpdateHandler (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:394:9)
+    at Server.<anonymous> (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\topology.js:501:77)
+    at Server.emit (node:events:509:28)
+    at markServerUnknown (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:358:12)
+    at Server.handleError (D:\New folder\E-commrece-backed\node_modules\mongodb\lib\sdam\server.js:249:17)
+    at D:\New folder\E-commrece-backed\node_modules\mongodb\lib\cmap\connection_pool.js:395:25
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+

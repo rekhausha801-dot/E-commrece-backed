@@ -107,3 +107,27 @@ export const createCustomer = async (req, res) => { res.status(200).json({ succe
 export const updateCustomer = async (req, res) => { res.status(200).json({ success: true }); };
 export const updateCustomerStatus = async (req, res) => { res.status(200).json({ success: true }); };
 export const deleteCustomer = async (req, res) => { res.status(200).json({ success: true }); };
+
+export const sendMessageToCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, message, type } = req.body;
+    
+    if (!title || !message) {
+      return res.status(400).json({ success: false, message: 'Title and message are required' });
+    }
+
+    const { createCustomerNotification } = await import('./customerNotification.controller.js');
+    await createCustomerNotification({
+      user: id,
+      type: type || 'Info',
+      title,
+      message,
+      link: '/customer/dashboard'
+    });
+
+    res.json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

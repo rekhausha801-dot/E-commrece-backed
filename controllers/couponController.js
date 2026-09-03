@@ -43,6 +43,16 @@ export const validateCoupon = async (req, res) => {
       }
     }
 
+    if (email) {
+      const previousCouponUsage = await Order.countDocuments({ 
+        'customer.email': email, 
+        'couponCode': { $ne: null, $exists: true, $ne: '' }
+      });
+      if (previousCouponUsage > 0) {
+        return res.status(400).json({ success: false, message: 'You already used a coupon. Only one coupon can be used per customer.' });
+      }
+    }
+
     if (cartTotal < offer.minPurchase) {
       return res.status(400).json({ 
         success: false, 
@@ -59,6 +69,27 @@ export const validateCoupon = async (req, res) => {
       discount,
       finalAmount
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const checkCouponUsage = async (req, res) => {
+  try {
+    const { code, email } = req.body;
+    if (!code || !email) {
+      return res.status(400).json({ success: false, message: 'Coupon code and email are required' });
+    }
+
+    const previousCouponUsage = await Order.countDocuments({ 
+      'customer.email': email, 
+      'couponCode': { $ne: null, $exists: true, $ne: '' }
+    });
+
+    if (previousCouponUsage > 0) {
+      return res.json({ success: true, used: true, message: 'You already used a coupon. Only one coupon can be used per customer.' });
+    }
+
+    res.json({ success: true, used: false });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
