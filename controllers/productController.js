@@ -306,6 +306,7 @@ export const updateProduct = async (req, res) => {
       data: product
     });
   } catch (error) {
+    console.error('Error in updateProduct:', error);
     res.status(400).json({ success: false, message: 'Failed to update product', error: error.message });
   }
 };

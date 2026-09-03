@@ -6,7 +6,8 @@ import {
   createCustomer,
   updateCustomer,
   updateCustomerStatus,
-  deleteCustomer
+  deleteCustomer,
+  sendMessageToCustomer
 } from '../controllers/customerController.js';
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.route('/:id')
   .delete(deleteCustomer);
 
 router.patch('/:id/status', updateCustomerStatus);
+router.post('/:id/message', sendMessageToCustomer);
 
 export default router;

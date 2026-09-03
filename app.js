@@ -76,7 +76,7 @@ app.use((err, req, res, next) => {
   }
 
   console.error(err);
-  if (err instanceof require('multer').MulterError) {
+  if (err.name === 'MulterError') {
     return res.status(400).json({ success: false, message: 'Upload error: ' + err.message });
   } else if (err) {
     return res.status(500).json({ success: false, message: err.message });
