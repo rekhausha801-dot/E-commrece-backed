@@ -55,16 +55,35 @@ export const searchProducts = async (req, res) => {
     if (q) {
       // Create a regex for partial, case-insensitive match
       const searchRegex = new RegExp(q, 'i');
+      
+      const matchingCategories = await Category.find({ name: searchRegex }).select('_id');
+      const categoryIds = matchingCategories.map(cat => cat._id);
+
       query.$or = [
         { name: searchRegex },
         { brand: searchRegex },
-        { category: searchRegex },
         { subCategory: searchRegex }
       ];
+
+      if (categoryIds.length > 0) {
+        query.$or.push({ category: { $in: categoryIds } });
+      }
     }
 
     // 2. Filters
-    if (category) query.category = new RegExp(`^${category}$`, 'i');
+    if (category) {
+      if (category.match(/^[0-9a-fA-F]{24}$/)) {
+        query.category = category;
+      } else {
+        const matchedCategory = await Category.findOne({ name: new RegExp(`^${category}$`, 'i') }).select('_id');
+        if (matchedCategory) {
+          query.category = matchedCategory._id;
+        } else {
+          // If category by name not found, ensure query returns nothing
+          query.category = '000000000000000000000000';
+        }
+      }
+    }
     if (subCategory) query.subCategory = new RegExp(`^${subCategory}$`, 'i');
     if (brand) query.brand = new RegExp(`^${brand}$`, 'i');
 
