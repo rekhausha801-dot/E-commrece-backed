@@ -4,7 +4,10 @@ import { getProducts, getProductById, searchProducts, getProductsByCategory, cre
 
 const router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fieldSize: 10 * 1024 * 1024 } // 10MB limit for large base64 string fields
+});
 
 // Place specific routes before parameterized routes
 router.get('/search', searchProducts);
