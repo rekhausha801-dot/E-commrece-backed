@@ -358,3 +358,25 @@ export const revokeSession = async (req, res) => {
 export const revokeAllSessions = async (req, res) => {
   res.json({ success: true, message: 'All other sessions revoked successfully' });
 };
+
+
+export const updatePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { newPassword } = req.body;
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
