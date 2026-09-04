@@ -130,9 +130,12 @@ export const searchProducts = async (req, res) => {
     // 5. Execute Query
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
+      .select('-designs -seoTitle -seoDesc -seoKeywords -faqs -sizeGuide -shortDesc -specs')
       .sort(sortOptions)
       .skip(skip)
-      .limit(limitNumber);
+      .limit(limitNumber)
+      .populate('category', 'name')
+      .lean();
 
     res.json({
       success: true,
@@ -151,10 +154,33 @@ export const searchProducts = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 }).populate('category', 'name description status icon');
+    // Pagination support (backward-compatible: default to page=1, limit=50)
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+    const skip = (page - 1) * limit;
+
+    // Lightweight projection: exclude heavy Base64-capable fields from the list endpoint.
+    // designs[].modelImage can contain large Base64 strings (4-5MB per product).
+    // Product Detail page uses getProductById which returns full data.
+    const PRODUCT_LIST_PROJECTION = '-designs -seoTitle -seoDesc -seoKeywords -faqs -sizeGuide -shortDesc -specs';
+
+    const [total, products] = await Promise.all([
+      Product.countDocuments({}),
+      Product.find({})
+        .select(PRODUCT_LIST_PROJECTION)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('category', 'name description status icon')
+        .lean()
+    ]);
+
     res.json({
       success: true,
-      count: products.length,
+      count: total,          // backward-compatible: total count
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
       data: products
     });
   } catch (error) {
@@ -166,11 +192,25 @@ export const getProductById = async (req, res) => {
   try {
     let product = null;
     if (req.params.id && req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findById(req.params.id).populate('category', 'name description status icon');
+      product = await Product.findById(req.params.id)
+        .populate('category', 'name description status icon')
+        .lean();
     }
     if (!product) {
       return res.json({ success: false, data: null, error: 'Product not found' });
     }
+
+    // Sanitize designs[].modelImage — strip any remaining Base64 blobs
+    // so the detail page doesn't receive multi-MB data for unmigrated products
+    if (product.designs && product.designs.length > 0) {
+      product.designs = product.designs.map(d => ({
+        ...d,
+        modelImage: d.modelImage && (d.modelImage.startsWith('http://') || d.modelImage.startsWith('https://'))
+          ? d.modelImage
+          : null
+      }));
+    }
+
     res.json({
       success: true,
       data: product
@@ -246,6 +286,40 @@ export const generateUniqueSku = async (category, subCategory) => {
   return candidateSku;
 };
 
+// Helper function to process Base64 images in designs array
+const processDesignImages = async (designs, sku) => {
+  if (!designs || !Array.isArray(designs)) return designs;
+  
+  for (let i = 0; i < designs.length; i++) {
+    const design = designs[i];
+    
+    // Process modelImage
+    if (design.modelImage && design.modelImage.startsWith('data:image/')) {
+      try {
+        const base64Data = design.modelImage.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        const result = await uploadToCloudinary(buffer, 'ecommerce/products/designs');
+        design.modelImage = result.secure_url;
+      } catch (err) {
+        console.error(`Failed to upload modelImage for design ${design.name}`, err);
+      }
+    }
+    
+    // Process icon
+    if (design.icon && design.icon.startsWith('data:image/')) {
+      try {
+        const base64Data = design.icon.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        const result = await uploadToCloudinary(buffer, 'ecommerce/products/designs');
+        design.icon = result.secure_url;
+      } catch (err) {
+        console.error(`Failed to upload icon for design ${design.name}`, err);
+      }
+    }
+  }
+  return designs;
+};
+
 export const createProduct = async (req, res) => {
   try {
     let productData = { ...req.body };
@@ -254,6 +328,11 @@ export const createProduct = async (req, res) => {
     // Auto-generate or deduplicate SKU if not provided or already exists
     if (!productData.sku || (await Product.findOne({ sku: productData.sku }))) {
       productData.sku = await generateUniqueSku(productData.category, productData.subCategory);
+    }
+
+    // Process Base64 images in designs array
+    if (productData.designs && productData.designs.length > 0) {
+      productData.designs = await processDesignImages(productData.designs, productData.sku);
     }
 
     // Handle Image Uploads
@@ -290,18 +369,25 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
+    // Process Base64 images in designs array
+    if (productData.designs && productData.designs.length > 0) {
+      productData.designs = await processDesignImages(productData.designs, existingProduct.sku || 'updated');
+    }
+
     // Handle Images
     const existingImages = productData.images || []; // the images sent from frontend that should be kept
     const imagesToKeepIds = existingImages.map(img => img.public_id).filter(Boolean);
 
-    // Find images to delete from Cloudinary
+    // Find images to delete from Cloudinary but don't delete yet!
+    const oldImagesToDelete = [];
     for (const oldImg of existingProduct.images) {
       if (oldImg.public_id && !imagesToKeepIds.includes(oldImg.public_id)) {
-        await deleteFromCloudinary(oldImg.public_id);
+        oldImagesToDelete.push(oldImg.public_id);
       }
     }
 
     // Upload new files
+    const newlyUploadedPublicIds = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await uploadToCloudinary(file.buffer, 'ecommerce/products');
@@ -310,6 +396,7 @@ export const updateProduct = async (req, res) => {
           public_id: result.public_id,
           alt: file.fieldname === 'coverImage' ? 'Main' : 'Gallery'
         });
+        newlyUploadedPublicIds.push(result.public_id);
       }
     }
 
@@ -320,11 +407,23 @@ export const updateProduct = async (req, res) => {
       runValidators: true
     });
 
+    // Safely delete old images now that the DB has successfully saved
+    for (const publicId of oldImagesToDelete) {
+      await deleteFromCloudinary(publicId).catch(console.error);
+    }
+
     res.json({
       success: true,
       data: product
     });
   } catch (error) {
+    // Rollback: if DB save fails, delete newly uploaded images
+    if (typeof newlyUploadedPublicIds !== 'undefined' && newlyUploadedPublicIds.length > 0) {
+      for (const publicId of newlyUploadedPublicIds) {
+        await deleteFromCloudinary(publicId).catch(console.error);
+      }
+    }
+    
     console.error('Error in updateProduct:', error);
     res.status(400).json({ success: false, message: 'Failed to update product', error: error.message });
   }

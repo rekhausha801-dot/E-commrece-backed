@@ -129,7 +129,8 @@ export const getDashboardStats = async (req, res) => {
           $expr: { $lte: ['$countInStock', '$alertThreshold'] }
         }
       },
-      { $limit: 10 }
+      { $limit: 10 },
+      { $project: { designs: 0, specs: 0, faqs: 0 } }
     ]);
     const lowStockCount = await Product.countDocuments({ countInStock: { $lt: 10 } });
 
@@ -145,6 +146,7 @@ export const getDashboardStats = async (req, res) => {
         }
       },
       { $unwind: { path: '$productDetails', preserveNullAndEmptyArrays: true } },
+      { $project: { 'productDetails.designs': 0, 'productDetails.images': 0 } },
       {
         $lookup: {
           from: 'categories',
@@ -154,6 +156,7 @@ export const getDashboardStats = async (req, res) => {
         }
       },
       { $unwind: { path: '$categoryDetails', preserveNullAndEmptyArrays: true } },
+      { $project: { 'categoryDetails.image': 0, 'categoryDetails.icon': 0 } },
       {
         $group: {
           _id: { $ifNull: ['$categoryDetails.name', 'Uncategorized'] },
@@ -182,6 +185,7 @@ export const getDashboardStats = async (req, res) => {
       .lean();
 
     const topSellingProducts = await Product.find()
+      .select('name rating category images numReviews')
       .sort({ rating: -1, numReviews: -1 })
       .limit(5)
       .populate('category', 'name')
@@ -193,6 +197,7 @@ export const getDashboardStats = async (req, res) => {
       .lean();
 
     const newArrivals = await Product.find({})
+      .select('name price category images createdAt')
       .sort({ createdAt: -1 })
       .limit(3)
       .lean();
@@ -289,6 +294,7 @@ export const getRatingBreakdown = async (req, res) => {
         }
       },
       { $unwind: '$productInfo' },
+      { $project: { 'productInfo.designs': 0 } },
       {
         $project: {
           _id: 1,

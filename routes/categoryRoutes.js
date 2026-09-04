@@ -1,4 +1,5 @@
 import express from "express";
+import multer from 'multer';
 import {
   createCategory,
   getCategories,
@@ -10,10 +11,15 @@ import {
 
 const router = express.Router();
 
-router.post("/", createCategory);
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fieldSize: 10 * 1024 * 1024 }
+});
+
+router.post("/", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'icon', maxCount: 1 }]), createCategory);
 router.get("/", getCategories);
 router.get("/:id", getCategoryById);
-router.put("/:id", updateCategory);
+router.put("/:id", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'icon', maxCount: 1 }]), updateCategory);
 router.delete("/:id", deleteCategory);
 router.patch("/:id/status", updateCategoryStatus);
 

@@ -75,7 +75,7 @@ export const submitReview = async (req, res) => {
       review.title = title ? title.trim() : review.title;
       review.comment = comment.trim();
       if (imageUrls.length > 0) {
-        review.images = [...(review.images || []), ...imageUrls];
+        review.images = imageUrls; // Overwrite instead of append since frontend only uploads one
       }
       review.isVerifiedPurchase = isVerifiedPurchase || review.isVerifiedPurchase;
       review.status = 'approved';
