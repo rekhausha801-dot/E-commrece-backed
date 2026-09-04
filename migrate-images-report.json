@@ -1,0 +1,26 @@
+{
+  "mode": "execute",
+  "timestamp": "2026-09-03T10:07:13.119Z",
+  "categories": {
+    "stats": {
+      "total": 4,
+      "base64Found": 4,
+      "alreadyUrls": 0,
+      "migrated": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "failures": []
+  },
+  "products": {
+    "stats": {
+      "total": 27,
+      "base64Found": 0,
+      "alreadyUrls": 30,
+      "migrated": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    "failures": []
+  }
+}
