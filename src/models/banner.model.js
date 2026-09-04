@@ -29,6 +29,25 @@ const bannerSchema = new mongoose.Schema({
   link: {
     type: String
   },
+  fontSize: {
+    type: String
+  },
+  specialLayout: {
+    type: Boolean,
+    default: false
+  },
+  line1Text: { type: String, default: '' },
+  line1Color: { type: String, default: '#ffffff' },
+  line1Size: { type: String, default: '' },
+  line1Font: { type: String, default: 'Montserrat, sans-serif' },
+  line2Text: { type: String, default: '' },
+  line2Color: { type: String, default: '#ffffff' },
+  line2Size: { type: String, default: '' },
+  line2Font: { type: String, default: 'Playfair Display, serif' },
+  line3Text: { type: String, default: '' },
+  line3Color: { type: String, default: '#ffffff' },
+  line3Size: { type: String, default: '' },
+  line3Font: { type: String, default: 'Inter, sans-serif' },
   status: {
     type: Boolean,
     default: true

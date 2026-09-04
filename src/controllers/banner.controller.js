@@ -4,7 +4,31 @@ import path from 'path';
 
 export const createBanner = async (req, res) => {
   try {
-    const { title, description, type, textPosition, placement, link, status, startDate, endDate } = req.body;
+    const {
+      title,
+      description,
+      type,
+      textPosition,
+      placement,
+      link,
+      status,
+      startDate,
+      endDate,
+      fontSize,
+      specialLayout,
+      line1Text,
+      line1Color,
+      line1Size,
+      line1Font,
+      line2Text,
+      line2Color,
+      line2Size,
+      line2Font,
+      line3Text,
+      line3Color,
+      line3Size,
+      line3Font
+    } = req.body;
     let image = '';
     
     if (req.file) {
@@ -21,9 +45,23 @@ export const createBanner = async (req, res) => {
       placement,
       image,
       link,
+      fontSize,
+      specialLayout: specialLayout === 'true' || specialLayout === true,
       status: status === 'true' || status === true,
       startDate,
-      endDate
+      endDate,
+      line1Text,
+      line1Color,
+      line1Size,
+      line1Font,
+      line2Text,
+      line2Color,
+      line2Size,
+      line2Font,
+      line3Text,
+      line3Color,
+      line3Size,
+      line3Font
     });
 
     res.status(201).json({ success: true, data: banner });
@@ -67,7 +105,31 @@ export const updateBanner = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Banner not found' });
     }
 
-    const { title, description, type, textPosition, placement, link, status, startDate, endDate } = req.body;
+    const {
+      title,
+      description,
+      type,
+      textPosition,
+      placement,
+      link,
+      status,
+      startDate,
+      endDate,
+      fontSize,
+      specialLayout,
+      line1Text,
+      line1Color,
+      line1Size,
+      line1Font,
+      line2Text,
+      line2Color,
+      line2Size,
+      line2Font,
+      line3Text,
+      line3Color,
+      line3Size,
+      line3Font
+    } = req.body;
 
     const updateData = {
       title,
@@ -76,9 +138,23 @@ export const updateBanner = async (req, res) => {
       textPosition,
       placement,
       link,
+      fontSize,
+      specialLayout: specialLayout === 'true' || specialLayout === true,
       status: status === 'true' || status === true,
       startDate,
-      endDate
+      endDate,
+      line1Text,
+      line1Color,
+      line1Size,
+      line1Font,
+      line2Text,
+      line2Color,
+      line2Size,
+      line2Font,
+      line3Text,
+      line3Color,
+      line3Size,
+      line3Font
     };
 
     if (req.file) {

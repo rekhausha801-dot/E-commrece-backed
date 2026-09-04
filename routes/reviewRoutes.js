@@ -12,7 +12,7 @@ import { protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // Memory storage for multer since we upload directly to Cloudinary
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fieldSize: 50 * 1024 * 1024 } });
 
 router.post('/', protect, upload.array('images', 5), submitReview);
 router.get('/product/:productId', getProductReviews);
