@@ -192,7 +192,7 @@ export const updateCategory = async (req, res) => {
 
     const updatedCategory = await category.save();
 
-    // Safely delete old images ONLY after save is complete
+    
     if (uploadedImagePublicId && oldImagePublicId) {
        await deleteFromCloudinary(oldImagePublicId).catch(console.error);
     }
@@ -206,7 +206,7 @@ export const updateCategory = async (req, res) => {
       data: updatedCategory,
     });
   } catch (error) {
-    // Rollback uploaded files on failure
+    
     if (uploadedImagePublicId) await deleteFromCloudinary(uploadedImagePublicId).catch(console.error);
     if (uploadedIconPublicId) await deleteFromCloudinary(uploadedIconPublicId).catch(console.error);
 

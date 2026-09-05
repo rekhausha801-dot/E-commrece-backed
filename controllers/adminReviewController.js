@@ -2,6 +2,41 @@ import Review from '../models/Review.js';
 import { deleteFromCloudinary } from '../config/cloudinary.js';
 import { updateProductRating } from '../services/reviewRatingService.js';
 
+// @desc    Get review stats (Admin)
+// @route   GET /api/admin/reviews/stats
+// @access  Private/Admin
+export const getReviewStats = async (req, res) => {
+  try {
+    const [totalReviews, verifiedCount, pendingCount, ratingAgg, positiveCount] = await Promise.all([
+      Review.countDocuments(),
+      Review.countDocuments({ isVerifiedPurchase: true }),
+      Review.countDocuments({ status: 'pending' }),
+      Review.aggregate([
+        { $match: { status: 'approved' } },
+        { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } }
+      ]),
+      Review.countDocuments({ rating: { $gte: 4 } })
+    ]);
+
+    const avgRating = ratingAgg.length > 0 ? parseFloat(ratingAgg[0].avg.toFixed(1)) : 0;
+    const positivePercent = totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalReviews,
+        avgRating,
+        verifiedCount,
+        pendingCount,
+        positivePercent
+      }
+    });
+  } catch (error) {
+    console.error('getReviewStats error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // @desc    Get all reviews (Admin)
 // @route   GET /api/admin/reviews
 // @access  Private/Admin
