@@ -223,10 +223,51 @@ export const getProductById = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
-    const products = await Product.find({ category: categoryId }).populate('category', 'name description status icon');
+    let query = {};
 
-    // Filter active category products only if category exists and is active
-    const activeProducts = products.filter(p => p.category && p.category.status === 'active');
+    if (!categoryId || categoryId.toLowerCase() === 'all') {
+      query = {};
+    } else if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+      query.category = categoryId;
+    } else {
+      const targetName = categoryId.replace(/-/g, ' ');
+      const cleanTarget = categoryId.replace(/[^a-z0-9]/gi, '');
+
+      const catDoc = await Category.findOne({
+        $or: [
+          { name: new RegExp(`^${targetName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          { name: new RegExp(cleanTarget, 'i') }
+        ]
+      });
+
+      if (catDoc) {
+        query.category = catDoc._id;
+      } else {
+        const searchRegex = new RegExp(targetName, 'i');
+        query = {
+          $or: [
+            { subCategory: searchRegex },
+            { homeSection: searchRegex },
+            { name: searchRegex }
+          ]
+        };
+      }
+    }
+
+    const PRODUCT_LIST_PROJECTION = '-designs -seoTitle -seoDesc -seoKeywords -faqs -sizeGuide -shortDesc -specs';
+
+    const products = await Product.find(query)
+      .select(PRODUCT_LIST_PROJECTION)
+      .populate('category', 'name description status icon')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Filter active category products (support 'Active', 'active', or missing status)
+    const activeProducts = products.filter(p => {
+      if (!p.category) return true;
+      const st = (p.category.status || '').toLowerCase();
+      return st === 'active' || st === '';
+    });
 
     res.json({
       success: true,
@@ -234,6 +275,7 @@ export const getProductsByCategory = async (req, res) => {
       data: activeProducts
     });
   } catch (error) {
+    console.error("Error in getProductsByCategory:", error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };

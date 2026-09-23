@@ -51,13 +51,15 @@ export const submitReview = async (req, res) => {
       console.error('Error checking verified purchase:', orderErr);
     }
 
-    // Upload images if any
+    // Upload images if any — deduplicate by full URL to prevent duplicate entries from retries
+    const seenUrls = new Set();
     const imageUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
           const result = await uploadToCloudinary(file.buffer, 'ecommerce/reviews');
-          if (result && result.secure_url) {
+          if (result && result.secure_url && !seenUrls.has(result.secure_url)) {
+            seenUrls.add(result.secure_url);
             imageUrls.push(result.secure_url);
           }
         } catch (uploadErr) {

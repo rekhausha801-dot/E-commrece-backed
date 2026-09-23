@@ -120,5 +120,11 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes to prevent slow queries and timeouts
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ 'customer.customerId': 1 });
+
 const Order = mongoose.model('Order', orderSchema);
 export default Order;

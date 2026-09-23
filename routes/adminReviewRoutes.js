@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getAllReviews,
   getReviewById,
+  getReviewStats,
   updateReviewStatus,
   deleteReview,
   replyToReview,
@@ -11,6 +12,8 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.use(protect, admin);
+
+router.route('/stats').get(getReviewStats);
 
 router.route('/')
   .get(getAllReviews);
