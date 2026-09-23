@@ -1,8 +1,7 @@
 import Subcategory from "../models/Subcategory.js";
 import Category from "../models/Category.js";
 
-// @desc    Create new subcategory
-// @route   POST /api/subcategories
+
 export const createSubcategory = async (req, res) => {
   try {
     const { name, description, image, category } = req.body;
@@ -102,8 +101,6 @@ export const getSubcategories = async (req, res) => {
   }
 };
 
-// @desc    Get subcategory by ID
-// @route   GET /api/subcategories/:id
 export const getSubcategoryById = async (req, res) => {
   try {
     const subcategory = await Subcategory.findById(req.params.id).populate(
@@ -137,8 +134,6 @@ export const getSubcategoryById = async (req, res) => {
   }
 };
 
-// @desc    Get subcategories by category
-// @route   GET /api/subcategories/category/:categoryId
 export const getSubcategoriesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -151,13 +146,6 @@ export const getSubcategoriesByCategory = async (req, res) => {
       });
     }
 
-    // For customer-side usage, we might want to return only active subcategories, 
-    // but the requirement says "For customer-side usage, return only active subcategories"
-    // Usually we pass a query param or separate route, but here we can return all or active based on query
-    // Let's assume standard behavior returns all, but if ?active=true is passed it filters
-    // Or we could just return active for this specific route if that's what's meant.
-    // Let's just return all subcategories, but the frontend can filter or we can pass a query.
-    // I'll return all, as admin needs to see inactive ones too.
     
     let query = { category: categoryId };
     if (req.query.active === 'true') {
