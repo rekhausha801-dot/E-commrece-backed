@@ -24,6 +24,7 @@ export const getMyOrders = async (req, res) => {
 // @route   GET /api/orders
 // @access  Private
 export const getOrders = async (req, res) => {
+  console.log('ORDER API START');
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -44,16 +45,24 @@ export const getOrders = async (req, res) => {
         { orderId: { $regex: search, $options: 'i' } },
         { 'customer.name': { $regex: search, $options: 'i' } },
         { 'customer.email': { $regex: search, $options: 'i' } },
-        { 'products.productName': { $regex: search, $options: 'i' } },
+        { 'items.productName': { $regex: search, $options: 'i' } },
       ];
     }
 
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    
-    const total = await Order.countDocuments(query);
+    const [ordersRaw, total] = await Promise.all([
+      Order.find(query)
+        .select('-items.selectedDesign')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(), // Use lean for faster execution since we don't need Mongoose documents
+      Order.countDocuments(query)
+    ]);
+
+    const orders = ordersRaw.map(order => ({
+      ...order,
+      items: Array.isArray(order.items) ? order.items : []
+    }));
 
     res.json({
       success: true,
@@ -66,11 +75,19 @@ export const getOrders = async (req, res) => {
         pages: Math.ceil(total / limit)
       }
     });
+    console.log('ORDER API RESPONSE');
   } catch (error) {
-    const fs = await import('fs');
-    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
-    res.status(500).json({ success: false, message: error.message, stack: error.stack });
-}
+    console.error('getOrders Error:', error);
+    try {
+      const fs = await import('fs');
+      fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    } catch (fsError) {
+      console.error('Failed to write to error_log.txt:', fsError);
+    }
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: error.message, stack: error.stack });
+    }
+  }
 };
 
 // @desc    Get dashboard statistics for orders
@@ -78,34 +95,18 @@ export const getOrders = async (req, res) => {
 // @access  Private
 export const getOrderStats = async (req, res) => {
   try {
-    const stats = await Order.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-          processing: {
-            $sum: { $cond: [{ $eq: ['$orderStatus', 'Processing'] }, 1, 0] }
-          },
-          delivered: {
-            $sum: { $cond: [{ $eq: ['$orderStatus', 'Delivered'] }, 1, 0] }
-          },
-          cancelled: {
-            $sum: { $cond: [{ $eq: ['$orderStatus', 'Cancelled'] }, 1, 0] }
-          }
-        }
-      }
+    const [totalOrders, processing, delivered, cancelled] = await Promise.all([
+      Order.countDocuments(),
+      Order.countDocuments({ orderStatus: 'Processing' }),
+      Order.countDocuments({ orderStatus: 'Delivered' }),
+      Order.countDocuments({ orderStatus: 'Cancelled' })
     ]);
 
-    const result = stats.length > 0 ? {
-      totalOrders: stats[0].totalOrders,
-      processing: stats[0].processing,
-      delivered: stats[0].delivered,
-      cancelled: stats[0].cancelled,
-    } : {
-      totalOrders: 0,
-      processing: 0,
-      delivered: 0,
-      cancelled: 0,
+    const result = {
+      totalOrders,
+      processing,
+      delivered,
+      cancelled,
     };
 
     res.json({
@@ -114,10 +115,17 @@ export const getOrderStats = async (req, res) => {
       data: result
     });
   } catch (error) {
-    const fs = await import('fs');
-    fs.appendFileSync('error_log.txt', error.stack + '\n\n');
-    res.status(500).json({ success: false, message: error.message, stack: error.stack });
-}
+    console.error('getOrderStats Error:', error);
+    try {
+      const fs = await import('fs');
+      fs.appendFileSync('error_log.txt', error.stack + '\n\n');
+    } catch (fsError) {
+      console.error('Failed to write to error_log.txt:', fsError);
+    }
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: error.message, stack: error.stack });
+    }
+  }
 };
 
 // @desc    Get single order by ID

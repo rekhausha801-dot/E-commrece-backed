@@ -237,8 +237,20 @@ export const getProductsByCategory = async (req, res) => {
 
     const products = await Product.find({ category: queryCategory }).populate('category', 'name description status icon');
 
-    // Filter active category products only if category exists and is active
-    const activeProducts = products.filter(p => p.category && p.category.status === 'active');
+    const PRODUCT_LIST_PROJECTION = '-designs -seoTitle -seoDesc -seoKeywords -faqs -sizeGuide -shortDesc -specs';
+
+    const products = await Product.find(query)
+      .select(PRODUCT_LIST_PROJECTION)
+      .populate('category', 'name description status icon')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Filter active category products (support 'Active', 'active', or missing status)
+    const activeProducts = products.filter(p => {
+      if (!p.category) return true;
+      const st = (p.category.status || '').toLowerCase();
+      return st === 'active' || st === '';
+    });
 
     res.json({
       success: true,
@@ -246,6 +258,7 @@ export const getProductsByCategory = async (req, res) => {
       data: activeProducts
     });
   } catch (error) {
+    console.error("Error in getProductsByCategory:", error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
