@@ -223,36 +223,19 @@ export const getProductById = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
-    let query = {};
-
-    if (!categoryId || categoryId.toLowerCase() === 'all') {
-      query = {};
-    } else if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
-      query.category = categoryId;
-    } else {
-      const targetName = categoryId.replace(/-/g, ' ');
-      const cleanTarget = categoryId.replace(/[^a-z0-9]/gi, '');
-
-      const catDoc = await Category.findOne({
-        $or: [
-          { name: new RegExp(`^${targetName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-          { name: new RegExp(cleanTarget, 'i') }
-        ]
-      });
-
-      if (catDoc) {
-        query.category = catDoc._id;
+    let queryCategory = categoryId;
+    
+    if (!categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+      const Category = (await import('../models/Category.js')).default;
+      const matchedCategory = await Category.findOne({ name: new RegExp(`^${categoryId}$`, 'i') }).select('_id');
+      if (matchedCategory) {
+        queryCategory = matchedCategory._id;
       } else {
-        const searchRegex = new RegExp(targetName, 'i');
-        query = {
-          $or: [
-            { subCategory: searchRegex },
-            { homeSection: searchRegex },
-            { name: searchRegex }
-          ]
-        };
+        queryCategory = '000000000000000000000000';
       }
     }
+
+    const products = await Product.find({ category: queryCategory }).populate('category', 'name description status icon');
 
     const PRODUCT_LIST_PROJECTION = '-designs -seoTitle -seoDesc -seoKeywords -faqs -sizeGuide -shortDesc -specs';
 
@@ -364,7 +347,7 @@ const processDesignImages = async (designs, sku) => {
 
 export const createProduct = async (req, res) => {
   try {
-    let productData = { ...req.body };
+    let productData = { ...req.body }; console.log('CREATE PRODUCT DATA:', req.body);
     productData = parseFormDataFields(productData);
 
     // Auto-generate or deduplicate SKU if not provided or already exists
@@ -403,7 +386,7 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    let productData = { ...req.body };
+    let productData = { ...req.body }; console.log('CREATE PRODUCT DATA:', req.body);
     productData = parseFormDataFields(productData);
 
     const existingProduct = await Product.findById(req.params.id);
