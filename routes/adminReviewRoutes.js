@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getAllReviews,
+  getReviewStats,
   getReviewById,
   updateReviewStatus,
   deleteReview,
@@ -14,6 +15,9 @@ router.use(protect, admin);
 
 router.route('/')
   .get(getAllReviews);
+
+router.route('/stats')
+  .get(getReviewStats);
 
 router.route('/:id')
   .get(getReviewById)

@@ -223,7 +223,19 @@ export const getProductById = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
-    const products = await Product.find({ category: categoryId }).populate('category', 'name description status icon');
+    let queryCategory = categoryId;
+    
+    if (!categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+      const Category = (await import('../models/Category.js')).default;
+      const matchedCategory = await Category.findOne({ name: new RegExp(`^${categoryId}$`, 'i') }).select('_id');
+      if (matchedCategory) {
+        queryCategory = matchedCategory._id;
+      } else {
+        queryCategory = '000000000000000000000000';
+      }
+    }
+
+    const products = await Product.find({ category: queryCategory }).populate('category', 'name description status icon');
 
     // Filter active category products only if category exists and is active
     const activeProducts = products.filter(p => p.category && p.category.status === 'active');
@@ -322,7 +334,7 @@ const processDesignImages = async (designs, sku) => {
 
 export const createProduct = async (req, res) => {
   try {
-    let productData = { ...req.body };
+    let productData = { ...req.body }; console.log('CREATE PRODUCT DATA:', req.body);
     productData = parseFormDataFields(productData);
 
     // Auto-generate or deduplicate SKU if not provided or already exists
@@ -361,7 +373,7 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    let productData = { ...req.body };
+    let productData = { ...req.body }; console.log('CREATE PRODUCT DATA:', req.body);
     productData = parseFormDataFields(productData);
 
     const existingProduct = await Product.findById(req.params.id);
